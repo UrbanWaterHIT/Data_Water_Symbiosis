@@ -89,8 +89,12 @@ pip install -r requirements_2.txt   # population & gini
 ### Option B — conda
 
 ```bash
-conda env create -f environment.yml
-conda activate datawater
+conda env create -f requirements_1.yml
+conda activate requirements_1
+conda env create -f requirements_2.yml
+conda activate requirements_2
+
+
 ```
 
 ---
@@ -136,10 +140,10 @@ python -m datawater.match \
 
 ```bash
 python -m datawater.noise \
-  --sources demo/data/spain/sources_spain.csv \
-  --pop demo/data/population/global_population_demo.csv \
+  --sources demo/data/spain/sources_spain.xlsx:Sources \
+  --pop demo/data/population/global_population_demo.xlsx:Population \
   --out demo/output
-```
+
 
 **Outputs**
 
@@ -150,7 +154,7 @@ python -m datawater.noise \
 
 ```bash
 python -m datawater.gini \
-  --adm2 demo/data/inequality/adm2_metrics_spain.csv \
+  --adm2 demo/data/inequality/adm2_metrics_spain.xlsx:ADM2 \
   --out demo/output
 ```
 
@@ -185,7 +189,7 @@ run_pipeline("path/to/your.csv", "path/to/out_dir")
 
 **Key parameters**
 
-* `max_link_km` (default: 40)
+* `max_link_km` (default: 107)
 * `unmet_demand_penalty` (large positive)
 * `unused_supply_penalty` (usually 0)
 * `hours_per_year` (default: 8760)
@@ -197,8 +201,7 @@ python -m datawater.match \
   --supply data/<ISO3>/wwtp_supply.csv \
   --demand data/<ISO3>/datacenter_demand.csv \
   --out out/<ISO3> \
-  --max-link-km 40 \
-  --pue 1.25
+  --max-link-km 107 \
 ```
 
 **Outputs** (Excel workbook)
@@ -261,8 +264,8 @@ hours_per_year: 8760
 unmet_demand_penalty: 1e6
 unused_supply_penalty: 0
 paths:
-  supply: demo/data/wwtp_supply.csv
-  demand: demo/data/datacenter_demand.csv
+  supply: demo/data/spain/wwtp_supply.xlsx:Wastewater
+  demand: demo/data/spain/datacenter_demand.xlsx:DataCenters
   outdir: demo/output
 ```
 
