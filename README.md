@@ -283,7 +283,7 @@ Creates `results/` with figure data and panels (placeholder script for now).
 
 ## Troubleshooting & FAQ
 
-* **ImportError (geopandas/pyproj)** → Prefer `conda` install or ensure GDAL is present.
+* **ImportError (geopandas/pyproj)** → Prefer `conda` install or ensure geopandas is present.
 * **Memory pressure on big countries** → Run per‑country; increase RAM; for BallTree set `batch_size`.
 * **Coordinate systems** → All lat/lon should be **WGS84 (EPSG:4326)**; BallTree radii in **radians**.
 * **Reproducibility** → Set `PYTHONHASHSEED=0` and pin versions via `environment.yml`.
