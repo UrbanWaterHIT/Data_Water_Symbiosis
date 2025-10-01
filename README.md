@@ -36,7 +36,7 @@ This module performs country‑by‑country allocation of treated water cooling 
 
 * **Inputs (per country)**: two tables — WWTP supply nodes and data center demand nodes — each with `id, lat, lon, annual_capacity_or_load` (see schema below).
 * **Distance filter**: great‑circle distances computed by vectorized Haversine; links allowed only if `distance_km ≤ max_link_km`.
-- **Objective**: minimize ∑_{i,j} (E_ij × d_ij) × f_ij, where E_ij is per-unit energy on arc i→j (e.g., kWh per m³) and d_ij is distance. This is a pure energy×distance objective;
+- **Objective**: minimize ∑_{i,j} (E_ij × d_ij) × f_ij, where E_ij is per-unit energy on arc i→j (e.g., MWh) and d_ij is distance. This is a pure energy×distance objective;
 * **Slack handling**: a super‑sink/source pair allows **unused supply** (zero cost) and **unmet demand** (large penalty), ensuring feasibility under imbalance.
 * **Outputs**: per‑country Excel workbook summarizing
 
@@ -112,7 +112,7 @@ A tiny demo dataset is provided under `demo/data/`. You can also use the **Spain
 
 > Schemas
 >
-> * `wwtp_supply.csv`: `plant_id, lat, lon, q_treated_m3_per_yr, carbon_intensity_kgco2_per_kwh?`
+> * `wwtp_supply.csv`: `plant_id, lat, lon, q_treated_m3_per_yr?`
 > * `datacenter_demand.csv`: `datacenter_id, lat, lon, it_load_mw, pue, noise_db_pre, noise_db_post`
 > * `sources_spain.csv`: `src_id, lat, lon, radius_m`
 > * `global_population_demo.csv`: `lat, lon, pop, GID_0`
@@ -180,8 +180,8 @@ run_pipeline("path/to/your.csv", "path/to/out_dir")
 
 **Input schemas**
 
-* `wwtp_supply.csv` — `plant_id, lat, lon, q_treated_m3_per_yr, carbon_intensity_kgco2_per_kwh (optional)`
-* `datacenter_demand.csv` — `datacenter_id, lat, lon, it_load_mw, pue` (or a global `pue` in config)
+* `wwtp_supply.csv` — `plant_id, lat, lon, q_treated_m3_per_yr, cooling_energy_MWh (optional)`
+* `datacenter_demand.csv` — `datacenter_id, lat, lon, total_mw, pue` 
 
 **Key parameters**
 
