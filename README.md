@@ -1,3 +1,5 @@
+---
+
 # Data‑Water Infrastructure Symbiosis
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
@@ -16,7 +18,7 @@ A research codebase and reproducible demo for coupling data center cooling with 
 5. [Use on your own data](#use-on-your-own-data)
 6. [Module‑level details](#module-level-details)
 
-   * [1) Datacenter↔WWTP matching](#1-datacenter↔wwtp-matching)
+   * [1) Data center ↔ WWTP matching](#1-data-center-wwtp-matching)
    * [2) Noise‑affected population](#2-noise-affected-population)
    * [3) Inequality via Gini](#3-inequality-via-gini)
 7. [Configuration examples](#configuration-examples)
@@ -34,15 +36,15 @@ A research codebase and reproducible demo for coupling data center cooling with 
 
 This module performs country‑by‑country allocation of treated water cooling supply from **wastewater treatment plants (WWTPs)** to **data centers** cooling demand via a minimum CO₂ model (OR‑Tools SimpleMinCostFlow).
 
-* **Inputs (per country)**: two tables — WWTP supply nodes and data center demand nodes — each with `id, lat, lon, annual_capacity_or_load` (see schema below).
+* **Inputs (per country)**: two tables — WWTP supply nodes and data center demand nodes — each with `data_center_ID, Latitude, Longitude, Cooling_energy_demand (MWh yr-1)` (see schema below).
 * **Distance filter**: great‑circle distances computed by vectorized Haversine; links allowed only if `distance_km ≤ max_link_km`.
-- **Objective**: minimize ∑_{i,j} (E_ij × d_ij) × f_ij, where E_ij is per-unit energy on arc i→j (e.g., MWh) and d_ij is distance. This is a pure energy×distance objective;
+* **Objective**: minimize ∑_{i,j} (E_ij × d_ij) × f_ij, where E_ij is per-unit energy on arc i→j (e.g., MWh) and d_ij is distance. This is a pure energy×distance objective;
 * **Slack handling**: a super‑sink/source pair allows **unused supply** (zero cost) and **unmet demand** (large penalty), ensuring feasibility under imbalance.
 * **Outputs**: per‑country Excel workbook summarizing
 
   1. optimal link allocations and each data center satisfied share,
   2. unmet demand with satisfaction percentages, and
-  3. residual supply with remaining percentages. Loads are converted to annual cooling energy using a configurable **PUE** and **8,760 h·yr⁻¹**.
+  3. residual supply with remaining percentages. Loads are converted to annual cooling energy using a configurable  and **8,760 h·yr⁻¹**.
 
 ### 2) Noise‑affected population estimation (uses `requirements_2.txt`)
 
@@ -61,7 +63,7 @@ Computes population‑weighted per‑capita values at ADM1 from a GID_2 table an
 
 ## System requirements
 
-* **OS**: Windows 10/11, macOS 12+, or Ubuntu 20.04/22.04
+* **OS**: Windows 10/11, or Ubuntu 20.04/22.04
 * **CPU & RAM**: ≥ 8 cores, 16–32 GB RAM recommended for country‑scale runs
 * **Python**: 3.10–3.11 (see `requirements_1.txt`, `requirements_2.txt`, or `environment.yml`)
 * **Tested on**: Python 3.10 + Ubuntu 22.04
@@ -93,8 +95,6 @@ conda env create -f requirements_1.yml
 conda activate requirements_1
 conda env create -f requirements_2.yml
 conda activate requirements_2
-
-
 ```
 
 ---
@@ -116,13 +116,13 @@ A tiny demo dataset is provided under `demo/data/`. You can also use the **Spain
 
 > Schemas
 >
-> * `wwtp_supply.csv`: `plant_id, lat, lon, q_treated_m3_per_yr?`
-> * `datacenter_demand.csv`: `datacenter_id, lat, lon, it_load_mw, pue, noise_db_pre, noise_db_post`
-> * `sources_spain.csv`: `src_id, lat, lon, radius_m`
-> * `global_population_demo.csv`: `lat, lon, pop, GID_0`
-> * `adm2_metrics_spain.csv`: `GID_2, ADM2_name, pop, datacenter_pre_kwh_per_cap, datacenter_post_kwh_per_cap`
+> * `wwtp_supply.csv`: `WASTE_ID, Latitude, Longitude, WASTE_DIS (m3 d-1)`
+> * `datacenter_demand.csv`: `data_center_ID, Latitude, Longitude, Total_power(MW), Cooling_energy_demand (MWh yr-1)`
+> * `sources_spain.csv`: `src_id, Latitude, Longitude, radius_m`
+> * `global_population_demo.csv`: `Latitude, Longitude, GID_0, Population`
+> * `adm2_metrics_spain.csv`: `GID_2, ADM2_name, Population, Datacenter_pre_kwh_per_cap, Datacenter_post_kwh_per_cap`
 
-#### 1) Run Datacenter↔WWTP matching (minimum‑carbon proxy)
+#### 1) Run Data center ↔ WWTP matching (minimum‑carbon proxy)
 
 ```bash
 python -m datawater.match \
@@ -133,8 +133,8 @@ python -m datawater.match \
 **Outputs** (under `demo/output/`):
 
 * `links.xlsx` (or workbook): optimal allocations per WWTP–Datacenter pair
-* `datacenter_summary.csv`: `datacenter_id, demand_m3_per_yr, served_m3_per_yr, pct_served`
-* `wwtp_summary.csv`: `plant_id, supply_m3_per_yr, used_m3_per_yr, pct_used`
+* `datacenter_summary.csv`: `data_center_ID, demand_m3_per_yr, served_m3_per_yr, pct_served`
+* `wwtp_summary.csv`: `WASTE_ID, supply_m3_per_yr, used_m3_per_yr, pct_used`
 
 #### 2) Run noise‑affected population
 
@@ -143,12 +143,12 @@ python -m datawater.noise \
   --sources demo/data/spain/sources_spain.xlsx:Sources \
   --pop demo/data/population/global_population_demo.xlsx:Population \
   --out demo/output
+```
 
-
-**Outputs**
+**Outputs**:
 
 * `affected_by_source.csv`: population totals within each source’s radius
-* `population_mask.csv`: `lat, lon, affected_bool`
+* `population_mask.csv`: `Latitude, Longitude, affected_bool`
 
 #### 3) Compute inequality (Gini) at ADM1
 
@@ -158,12 +158,12 @@ python -m datawater.gini \
   --out demo/output
 ```
 
-**Outputs**
+**Outputs**:
 
 * `gini_summary.csv`: `ISO3, Gini_Pre, Gini_Post, Gini_Diff`
 * `plots/` with bar charts where |ΔGini| exceeds a threshold
 
-**Expected runtime**: ~2 minutes on a normal desktop.
+**Expected runtime**: ~20 minutes on a normal desktop.
 
 ---
 
@@ -174,18 +174,18 @@ from datawater import run_pipeline
 run_pipeline("path/to/your.csv", "path/to/out_dir")
 ```
 
-**Input CSV** must contain columns: `id, value1, value2` (see module schemas below). Outputs include `summary.csv` with metrics and a `run.log`.
+**Input CSV** must contain columns: `data_center_ID, Latitude, Longitude, Total_power, Cooling_energy_demand` (see module schemas below). Outputs include `summary.csv` with metrics and a `run.log`.
 
 ---
 
 ## Module‑level details
 
-### 1) Datacenter↔WWTP matching
+### 1) Data center ↔ WWTP matching
 
 **Input schemas**
 
-* `wwtp_supply.csv` — `plant_id, lat, lon, q_treated_m3_per_yr, cooling_energy_MWh (optional)`
-* `datacenter_demand.csv` — `datacenter_id, lat, lon, total_mw, pue` 
+* `wwtp_supply.csv` — `WASTE_ID, Latitude, Longitude, WASTE_DIS (m3 d-1), Cooling_energy_potential (MWh yr-1)`
+* `datacenter_demand.csv` — `data_center_ID, Latitude, Longitude, Total_power, Cooling_energy_demand`
 
 **Key parameters**
 
@@ -201,21 +201,21 @@ python -m datawater.match \
   --supply data/<ISO3>/wwtp_supply.csv \
   --demand data/<ISO3>/datacenter_demand.csv \
   --out out/<ISO3> \
-  --max-link-km 107 \
+  --max-link-km 107
 ```
 
 **Outputs** (Excel workbook)
 
-* `links`: `plant_id, datacenter_id, distance_km, flow_m3_per_yr, cost`
-* `datacenter_summary`: `datacenter_id, demand_m3_per_yr, served_m3_per_yr, pct_served`
-* `wwtp_summary`: `plant_id, supply_m3_per_yr, used_m3_per_yr, pct_used`
+* `links`: `WASTE_ID, data_center_ID, distance_km, flow_m3_per_yr, cost`
+* `datacenter_summary`: `data_center_ID, demand_m3_per_yr, served_m3_per_yr, pct_served`
+* `wwtp_summary`: `WASTE_ID, supply_m3_per_yr, used_m3_per_yr, pct_used`
 
 ### 2) Noise‑affected population
 
 **Inputs**
 
-* `sources.csv` — `src_id, lat, lon, radius_m`
-* `population.parquet/csv` — `lat, lon, pop, GID_0`
+* `sources.csv` — `src_id, Latitude, Longitude, radius_m`
+* `population.parquet/csv` — `Latitude, Longitude, Population, GID_0`
 
 **CLI**
 
@@ -235,7 +235,7 @@ python -m datawater.noise \
 
 **Inputs**
 
-* `adm2_metrics.csv` — `GID_2, ADM2_name, pop, Datacenter Pre, Datacenter Post`
+* `adm2_metrics.csv` — `GID_2, ADM2_name, Population, Datacenter Pre, Datacenter Post`
 
 **CLI**
 
@@ -321,5 +321,10 @@ PRs welcome! Please:
 
 ## Contact
 
-Maintainer: <Congchao Zhang> ([congchaozhang@stu.hit.edu.cn](congchaozhang@stu.hit.edu.cn)) 
-Repository: [https://github.com/urbanwaterDCWWTP/DataWater](https://github.com/urbanwaterDCWWTP/DataWater)
+Maintainer: <Congchao Zhang> ([congchaozhang@stu.hit.edu.cn](mailto:congchaozhang@stu.hit.edu.cn))
+Repository: [https://github.com/UrbanWaterHIT/](https://github.com/UrbanWaterHIT/)
+
+---
+
+
+
