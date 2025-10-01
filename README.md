@@ -65,7 +65,7 @@ Computes population‑weighted per‑capita values at ADM1 from a GID_2 table an
 
 * **OS**: Windows 10/11, or Ubuntu 20.04/22.04
 * **CPU & RAM**: ≥ 8 cores, 16–32 GB RAM recommended for country‑scale runs
-* **Python**: 3.10–3.11 (see `requirements_1.txt`, `requirements_2.txt`, or `environment.yml`)
+* **Python**: 3.10–3.11 (see `requirements_1.txt`, `requirements_2.txt`, `requirements_1.yml`, or `requirements_2.yml`)
 * **Tested on**: Python 3.10 + Ubuntu 22.04
 
 > Tip: On Windows, installing via **conda** is often smoother for geopandas/pyproj dependencies.
